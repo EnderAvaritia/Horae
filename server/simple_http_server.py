@@ -4,6 +4,7 @@ import json
 import os
 
 server_port=8080
+last_data={"error": "no_data"}
 
 def init_record_file():
     record_name=["时间","温度","湿度"]
@@ -21,11 +22,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         #通用的响应头
 
     def do_GET(self):
+        global last_data
         self._set_response()
-        self.wfile.write(json.dumps({"Todo": "I need a inedx.html"}).encode('utf-8'))
-        #get方法这里之后会返回生成的网页
+        self.wfile.write(json.dumps(last_data).encode('utf-8'))
+        #遗憾的是socketserver不能返回网页，get方法当作api用吧
         
     def do_POST(self):
+        global last_data
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         #print("post_data")
@@ -37,15 +40,15 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         
         if content_type=="application/json":
             #print("json")
-            data = json.loads(post_data)
-            self.wfile.write(json.dumps({"received": data}).encode('utf-8'))
+            last_data = json.loads(post_data)
+            self.wfile.write(json.dumps({"received": last_data}).encode('utf-8'))
             #这里要不要发个时间回去
             #这里是给采集器发送采集获得的数据用的
             
             with open('./record.csv', 'a+') as record:
                 record.write("\n")
-                for i in data.keys():
-                    record.write(str(data[i])+",")
+                for i in last_data.keys():
+                    record.write(str(last_data[i])+",")
                 #写入获得的数据
                 
         elif content_type=="text/plain":
