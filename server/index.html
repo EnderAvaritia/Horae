@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>李华の气象站</title>
+    <title>ETCのHorae</title>
     <script type="module" src="https://unpkg.com/@fluentui/web-components"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
     <script src="https://js.arcgis.com/4.29/"></script>
@@ -38,6 +38,11 @@
             position: fixed;
             top: 0;
             z-index: 1000;
+        }
+
+        a {
+            TEXT-DECORATION: none;
+            color: black;
         }
 
         .container {
@@ -187,7 +192,7 @@
 
 <body>
     <header>
-        <h1>李华家中の天气</h1>
+        <h1>ETCのHorae</h1>
     </header>
     <div class="container">
         <div class="sidebar">
@@ -250,12 +255,11 @@
                         <i class="fluent-icons icon-ic_fluent_location_20_regular"></i>
                         气象站位置 <span></span>
                     </div>
-                </div>
-                <div id="latest-photo" class="latest-values">
-                    <div class="latest-values-title">最新照片</div>
-                    <div class="value-box" data-type="photo" data-chart="photo-container">
-                        <i class="fluent-icons icon-ic_fluent_photo_filter_20_regular"></i>
-                        最新照片 <span></span>
+                    <div class="value-box" data-type="readme" data-chart="readme-chart">
+                        <a href="https://github.com/EnderAvaritia/Horae" target="_blank">
+                            <i class="fluent-icons icon-ic_fluent_location_20_regular"></i>
+                            项目地址 <span></span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -304,6 +308,9 @@
         </div>
         <div id="map-chart" class="chart-container">
             <div class="chart map" id="map-chart-container"></div>
+        </div>
+        <div id="readme-chart" class="chart-container">
+            <object data="https://raw.githubusercontent.com/EnderAvaritia/Horae/main/README.md"></object>
         </div>
     </div>
     </div>
@@ -655,50 +662,51 @@
             setInterval(fetchLatestData, 60000); // 每分钟刷新一次最新数据
         });
 
-        require([
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/Graphic"
-        ], function (Map, MapView, Graphic) {
-            const map = new Map({
-                basemap: "streets-vector"
-            });
-
-            const view = new MapView({
-                container: "map-chart-container",
-                map: map,
-                center: [113.2683, 23.109866], // 中心坐标
-                zoom: 15
-            });
-
-            function addMarker(latitude, longitude) {
-                const point = {
-                    type: "point",
-                    longitude: longitude,
-                    latitude: latitude
-                };
-
-                const markerSymbol = {
-                    type: "simple-marker",
-                    color: [226, 119, 40],
-                    outline: {
-                        color: [255, 255, 255],
-                        width: 2
-                    }
-                };
-
-                const pointGraphic = new Graphic({
-                    geometry: point,
-                    symbol: markerSymbol
+        require(
+            [
+                "esri/Map",
+                "esri/views/MapView",
+                "esri/Graphic"
+            ], function (Map, MapView, Graphic) {
+                const map = new Map({
+                    basemap: "streets-vector"
                 });
 
-                view.graphics.add(pointGraphic);
-            }
+                const view = new MapView({
+                    container: "map-chart-container",
+                    map: map,
+                    center: [120, 30], // 中心坐标
+                    zoom: 15
+                });
 
-            document.querySelector('.value-box[data-chart="map-chart"]').addEventListener('click', () => {
-                addMarker(23.109866, 113.2683); // 添加标记点
+                function addMarker(latitude, longitude) {
+                    const point = {
+                        type: "point",
+                        longitude: longitude,
+                        latitude: latitude
+                    };
+
+                    const markerSymbol = {
+                        type: "simple-marker",
+                        color: [226, 119, 40],
+                        outline: {
+                            color: [255, 255, 255],
+                            width: 2
+                        }
+                    };
+
+                    const pointGraphic = new Graphic({
+                        geometry: point,
+                        symbol: markerSymbol
+                    });
+
+                    view.graphics.add(pointGraphic);
+                }
+
+                document.querySelector('.value-box[data-chart="map-chart"]').addEventListener('click', () => {
+                    addMarker(23.109866, 113.2683); // 添加标记点
+                });
             });
-        });
     </script>
 </body>
 
