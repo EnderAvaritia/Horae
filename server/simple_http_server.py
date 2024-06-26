@@ -79,14 +79,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         global last_data
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
-        #print("post_data")
-        #print(str(post_data))
         content_type=str(self.headers['Content-Type'])
-        #print(content_type)
         #以上是post方法通用的部分
         
         if content_type=="application/json":
-            #print("json")
             last_data = json.loads(post_data)
             self._set_response("json")
             self.wfile.write(json.dumps({"received": last_data}).encode('utf-8'))
@@ -100,7 +96,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 #写入获得的数据
                 
         elif content_type=="text/plain":
-            #print("text")
             data=post_data.decode('utf-8')
             if str(data)=="time":
                 current_date_and_time = str(datetime.now().strftime("%Y/%D-%H:%M:%S"))
