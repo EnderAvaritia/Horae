@@ -8,7 +8,12 @@
 
 以下是各个文件夹的作用
 
+- arduino中记入烧录到传感器中的程序
+  - arduino.ino是烧录到esp32中的程序
+  - 其他文件是各种各样的前置库
 - server中的程序用于接收接收器收集的数据
+  - simple_http_server.py是服务器的后端
+  - index.html作为前端用于向用户展示
 
 ---
 
