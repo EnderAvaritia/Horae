@@ -198,7 +198,7 @@
 
 <body>
     <header>
-        <h1>ETCのHorae</h1>
+        <h1>ETC家中の天气</h1>
     </header>
     <div class="container">
         <div class="sidebar">
@@ -331,6 +331,7 @@
                 document.querySelectorAll('.chart-container').forEach(chart => chart.classList.remove('active'));
                 const chartId = item.getAttribute('data-chart');
                 document.getElementById(chartId).classList.add('active');
+                // 这里是使得点击的框出现被选中的效果
 
                 // 手动触发图表resize方法
                 const chartDom = document.getElementById(chartId).querySelector('.chart');
@@ -342,14 +343,16 @@
                 const type = item.getAttribute('data-type');
                 if (type === 'photo') {
                     fetchLatestPhoto();
-                } else if (type !== 'map' && type !== 'overview' && type !== 'readme') {
+                } else if (type !== 'map' && type !== 'overview' && type !== 'readme') 
+                // 如果有不想要拉取数据的框的id，写在这
+                {
                     fetchChartData(type, chartDom);
                 } else if (type === 'overview') {
                     fetchOverviewData(chartDom);
                 }
             });
         });
-
+        // 这里是从api获取数据
         async function fetchOverviewData(chartDom) {
             try {
                 const types = ['temperature', 'humidity', 'pressure', 'wind_speed', 'noise', 'rain', 'pm2dot5', 'pm10'];
@@ -362,6 +365,7 @@
 
                 const data = await Promise.all(promises);
 
+                // 格式化日期之后全部数据更新一遍
                 const xData = data[0].time.map(t => new Date(t).toLocaleString());
                 const temperatureData = data[0].temperature;
                 const humidityData = data[1].humidity;
@@ -372,11 +376,13 @@
                 const pm25Data = data[6].pm2dot5;
                 const pm10Data = data[7].pm10;
 
+                // 生成表格
                 createOverviewChart(chartDom, xData, temperatureData, humidityData, pressureData, windSpeedData, noiseData, rainData, pm25Data, pm10Data);
             } catch (error) {
                 console.error('Error fetching overview data:', error);
             }
         }
+        // 这是总览的表格的实现
         function createOverviewChart(chartDom, xData, temperatureData, humidityData, pressureData, windSpeedData, noiseData, rainData, pm25Data, pm10Data) {
             var chart = echarts.init(chartDom);
             var option = {
@@ -519,6 +525,7 @@
             chart.setOption(option);
         }
 
+        // 从网络拉取数据的部分，似乎是下面单个数据所绘制的图表中数据的获取
         async function fetchChartData(type, chartDom) {
             try {
                 const response = await fetch(`http://lihua.cncoresteb.com/api/charts?type=${type}`, {
@@ -537,6 +544,7 @@
             }
         }
 
+        // 这是左侧侧边栏中数据的获取
         async function fetchLatestData() {
             try {
                 const response = await fetch('http://lihua.cncoresteb.com/status');
@@ -556,9 +564,10 @@
             }
         }
 
+        // 和流萤一起拍照吧（棒读）
         async function fetchLatestPhoto() {
             try {
-                const response = await fetch('http://lihua.cncoresteb.com/photo');
+                const response = await fetch('');
                 const imageBlob = await response.blob();
                 const imageObjectURL = URL.createObjectURL(imageBlob);
                 document.getElementById('latest-photo-img').src = imageObjectURL;
@@ -567,6 +576,7 @@
             }
         }
 
+        // 绘制图标的实现
         function createChart(chartDom, xData, yData, title, yMin, yMax) {
             var chart = echarts.init(chartDom);
             var option = {
@@ -653,6 +663,7 @@
             chart.setOption(option);
         }
 
+        // 像是限制y轴最大值用的
         function getYRange(yData) {
             const min = Math.min(...yData);
             const max = Math.max(...yData);
@@ -671,6 +682,7 @@
             setInterval(fetchLatestData, 60000); // 每分钟刷新一次最新数据
         });
 
+        // 获取地图，赛博开盒
         require(
             [
                 "esri/Map",
@@ -713,7 +725,7 @@
                 }
 
                 document.querySelector('.value-box[data-chart="map-chart"]').addEventListener('click', () => {
-                    addMarker(23.109866, 113.2683); // 添加标记点
+                    addMarker(30,120); // 添加标记点
                 });
             });
     </script>
