@@ -12,13 +12,16 @@ last_data={"time":0,"pisition":0,"temperature":0,"humidity":0,"pressure":0,"wind
 '''
 注意！！！ 多个采集器的时候时间绝对不能相同，不如pandas排序会卡死
 
+艹！为啥标准的get请求不允许使用请求体啊！
+
 可用的请求方法
 get None 返回网页
-get text：last_data 最近一次的数据
-get text：time 授时
-get text：need_csv 全部数据（text格式的）
-get text：all 全部数据（json格式的）
-get text：在all_record_name中的元素 对应元素索引的数据（json格式的）
+
+post text：last_data 最近一次的数据
+post text：time 授时
+post text：need_csv 全部数据（text格式的）
+post text：all 全部数据（json格式的）
+post text：在all_record_name中的元素 对应元素索引的数据（json格式的）
 
 post json 用于传递数据
 '''
@@ -63,59 +66,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         #响应头
 
     def do_GET(self):
-        if self.headers['Content-Length']==None:
             self._set_response(200,"html")
             #遗憾的是socketserver不能返回网页，get方法当作api用吧
             with open("./index.html",'r',encoding='utf-8') as index:
                 self.wfile.write(index.read().encode('utf-8'))
             #艹，被群友糊弄了，不能返回网页个头子
             #默认的get请求
-        else:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            content_type=str(self.headers['Content-Type'])
-            #读点get的数据
-            
-            if content_type=="text/plain":
-                data=post_data.decode('utf-8')
-                global all_record_name
-                
-                if str(data)=="last_data":
-                    global last_data
-                    self._set_response(200,"json")
-                    self.wfile.write(json.dumps(last_data).encode('utf-8'))
-                    #之前搓的获取最新数据
-                elif str(data)=="time":
-                    current_date_and_time = str(datetime.now().strftime("%Y/%D-%H:%M:%S"))
-                
-                    #self._set_response(200,"json")
-                    #self.wfile.write(json.dumps({"datetime": current_date_and_time}).encode('utf-8'))
-                    
-                    self._set_response(200,"text")
-                    self.wfile.write(current_date_and_time.encode('utf-8'))
-                    
-                    #同步时间用的，采集器需要发送一个为text类型的内容为time的post请求,响应体用text还是json自己选
-                elif str(data)=="need_csv":
-                    self._set_response(200,"text")
-                    with open("./record.csv",'r',encoding='utf-8') as record:
-                        self.wfile.write(record.read().encode('utf-8'))
-                        #返回绘图所需的数据
-                        
-                elif str(data)=="all" or str(data) in all_record_name:
-                    self._set_response(200,"json")
-                    self.wfile.write(pd_get(str(data)).encode('utf-8'))
-                    #如果是all的话获取总览数据，如果是记录名的话，获取单列数据
-                    
-                else:
-                    self._set_response(404,"text")
-                    self.wfile.write("unexpended_request".encode('utf-8'))
-            else:
-                self._set_response(404,"text")
-                self.wfile.write("unexpended_request".encode('utf-8'))
-                #万一客户端发癫
         
     def do_POST(self):
         global last_data
+        global all_record_name
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         content_type=str(self.headers['Content-Type'])
@@ -129,7 +89,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             #这里是给采集器发送采集获得的数据用的
             
             with open('./record.csv', 'a+',encoding='utf-8') as record:
-                global all_record_name
                 for i in all_record_name:
                     if not i==all_record_name[-1]:
                         try:
@@ -147,6 +106,36 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 record.write("\n")
                 #写入获得的数据
                 
+                
+        #以下是获取数据用的        
+        elif content_type=="text/plain":
+            data=post_data.decode('utf-8')
+            
+            if str(data)=="last_data":
+                self._set_response(200,"json")
+                self.wfile.write(json.dumps(last_data).encode('utf-8'))
+                #之前搓的获取最新数据
+            elif str(data)=="time":
+                current_date_and_time = str(datetime.now().strftime("%Y/%D-%H:%M:%S"))
+            
+                #self._set_response(200,"json")
+                #self.wfile.write(json.dumps({"datetime": current_date_and_time}).encode('utf-8'))
+                
+                self._set_response(200,"text")
+                self.wfile.write(current_date_and_time.encode('utf-8'))
+                
+                #同步时间用的，采集器需要发送一个为text类型的内容为time的post请求,响应体用text还是json自己选
+            elif str(data)=="need_csv":
+                self._set_response(200,"text")
+                with open("./record.csv",'r',encoding='utf-8') as record:
+                    self.wfile.write(record.read().encode('utf-8'))
+                    #返回绘图所需的数据
+                    
+            elif str(data)=="all" or str(data) in all_record_name:
+                self._set_response(200,"json")
+                self.wfile.write(pd_get(str(data)).encode('utf-8'))
+                #如果是all的话获取总览数据，如果是记录名的话，获取单列数据
+           
         else:
             self._set_response(403,"text")
             self.wfile.write("unexpended_request".encode('utf-8'))
