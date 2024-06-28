@@ -1,10 +1,12 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
+import socketserver
+import http.server
 import pandas as pd
 import json
 import os
 
-server_host='127.0.0.1'
+server_host='0.0.0.0'
 server_port=8080
 last_data={"time":0,"pisition":0,"temperature":0,"humidity":0,"pressure":0,"wind_speed":0,"noise":0,"rain":0,"pm2dot5":0,"pm10":0}
 #空数据，防止出错
@@ -52,6 +54,12 @@ def pd_get(record_name):
     
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET,POST')
+        self.send_header('Access-Control-Allow-Headers', 'x-requested-with,content-type')
+        http.server.SimpleHTTPRequestHandler.end_headers(self)
+
     def _set_response(self,status,content_type):
         self.send_response(status)
         if content_type=="json":
