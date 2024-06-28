@@ -10,6 +10,8 @@ last_data={"time":0,"pisition":0,"temperature":0,"humidity":0,"pressure":0,"wind
 #空数据，防止出错
 
 '''
+注意！！！ 多个采集器的时候时间绝对不能相同，不如pandas排序会卡死
+
 可用的请求方法
 get None 返回网页
 get text：last_data 最近一次的数据
