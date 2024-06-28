@@ -324,6 +324,10 @@
     </div>
     </div>
     <script>
+
+        const server_URL="http://192.168.10.11:8080"
+
+
         document.querySelectorAll('.value-box').forEach(item => {
             item.addEventListener('click', (event) => {
                 document.querySelectorAll('.value-box').forEach(el => el.classList.remove('active'));
@@ -356,11 +360,13 @@
         async function fetchOverviewData(chartDom) {
             try {
                 const types = ['temperature', 'humidity', 'pressure', 'wind_speed', 'noise', 'rain', 'pm2dot5', 'pm10'];
-                const promises = types.map(type => fetch(`http://lihua.cncoresteb.com/api/charts?type=${type}`, {
-                    method: 'GET',
+                // const promises = types.map(type => fetch(`http://lihua.cncoresteb.com/api/charts?type=${type}`, {
+                const promises = types.map(type => fetch(server_URL, {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'text/plain'
+                    },
+                    body:type,
                 }).then(response => response.json()));
 
                 const data = await Promise.all(promises);
@@ -528,11 +534,13 @@
         // 从网络拉取数据的部分，似乎是下面单个数据所绘制的图表中数据的获取
         async function fetchChartData(type, chartDom) {
             try {
-                const response = await fetch(`http://lihua.cncoresteb.com/api/charts?type=${type}`, {
-                    method: 'GET',
+                // const response = await fetch(`http://lihua.cncoresteb.com/api/charts?type=${type}`, {
+                const response = await fetch(server_URL, {
+                    method: 'post',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'text/plain'
+                    },
+                    body:type,
                 });
                 const data = await response.json();
                 const xData = data.time.map(t => new Date(t).toLocaleString());
@@ -547,7 +555,14 @@
         // 这是左侧侧边栏中数据的获取
         async function fetchLatestData() {
             try {
-                const response = await fetch('http://lihua.cncoresteb.com/status');
+                // const response = await fetch('http://lihua.cncoresteb.com/status');
+                const response = await fetch(server_URL,{
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body:'last_data',
+                });
                 const latestData = await response.json();
 
                 document.getElementById('temperature-value').textContent = latestData.temperature;
