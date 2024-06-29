@@ -4,6 +4,8 @@
 
 受群友的[UMD](<https://github.com/ExDragine/UMD-Client>)影响而想去制作的一个小玩具
 
+要用的话记得改`simple_http_server.py` `index.html`  `arduino.ino` 中相关的参数
+
 ---
 
 ## 以下是各个文件夹的作用
@@ -36,4 +38,4 @@
 
 
 
-![sample](.\sample.jpg)
+![sample](https://raw.githubusercontent.com/EnderAvaritia/Horae/main/sample.jpg)

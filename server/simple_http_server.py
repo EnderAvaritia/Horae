@@ -99,6 +99,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             #这里要不要发个时间回去
             #这里是给采集器发送采集获得的数据用的
             
+            #if os.path.getsize("./record.csv") > 2048000:
+            #    record=pd.read_csv("./record.csv",header=0,index_col=0)
+            #    record.dorp(record.head(2500).index)
+            #    record.to_csv('./record.csv')
+            #查资料的时候发现pandas有个问题。数据多了会内存溢出……但是测了一下，1w多条数据都没炸内存……真有这事的话再说吧……
+            
             with open('./record.csv', 'a+',encoding='utf-8') as record:
                 for i in all_record_name:
                     if not i==all_record_name[-1]:
