@@ -90,6 +90,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         #以上是post方法通用的部分
         
         if content_type=="application/json":
+            
+            # print(post_data)
+            
             last_data = json.loads(post_data)
             self._set_response(200,"json")
             self.wfile.write(json.dumps({"received": last_data}).encode('utf-8'))

@@ -372,7 +372,7 @@
                 const data = await Promise.all(promises);
 
                 // 格式化日期之后全部数据更新一遍
-                const xData =  Object.keys(data[0]);
+                const xData =  convertTimestampsToFormattedDates(Object.keys(data[0]));
                 const temperatureData = Object.values(data[0]);
                 const humidityData = Object.values(data[1]);
                 const pressureData = Object.values(data[2]);
@@ -544,8 +544,8 @@
                 });
                 const data = await response.json();
 
-                const xData = Object.keys(data);;
-                const yData = Object.values(data);;
+                const xData = convertTimestampsToFormattedDates(Object.keys(data));
+                const yData = Object.values(data);
                 const yRange = getYRange(yData);
                 createChart(chartDom, xData, yData, type, yRange[0], yRange[1]);
             } catch (error) {
@@ -592,6 +592,23 @@
             }
         }
 
+            function formatDate(date) {
+                let year = date.getFullYear();
+                let month = ('0' + (date.getMonth() + 1)).slice(-2);
+                let day = ('0' + date.getDate()).slice(-2);
+                let hours = ('0' + date.getHours()).slice(-2);
+                let minutes = ('0' + date.getMinutes()).slice(-2);
+                let seconds = ('0' + date.getSeconds()).slice(-2);
+
+                return `${year}/${month}/${day}-${hours}:${minutes}:${seconds}`;
+            }
+
+            function convertTimestampsToFormattedDates(timestamps) {
+                return timestamps.map(timestamp => {
+                    let date = new Date(timestamp * 1000);
+                    return formatDate(date);
+                });
+            }
         // 绘制图标的实现
         function createChart(chartDom, xData, yData, title, yMin, yMax) {
             var chart = echarts.init(chartDom);
