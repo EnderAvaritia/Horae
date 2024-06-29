@@ -14,6 +14,8 @@
 #define timeZone 8
 // 设置NTP服务器
 #define NTP "ntp.aliyun.com"
+//设置采样频率（每多少毫秒）
+#define delayTime 10000
 
 // 初始化引脚
 DHT11 dht11(DHT11_pin);
@@ -122,5 +124,5 @@ void loop()
     Serial.println("NO Send");
   }
 
-	delay(10000);
+	delay(delayTime);
 }
