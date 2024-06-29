@@ -372,15 +372,15 @@
                 const data = await Promise.all(promises);
 
                 // 格式化日期之后全部数据更新一遍
-                const xData = data[0].time.map(t => new Date(t).toLocaleString());
-                const temperatureData = data[0].temperature;
-                const humidityData = data[1].humidity;
-                const pressureData = data[2].pressure;
-                const windSpeedData = data[3].wind_speed;
-                const noiseData = data[4].noise;
-                const rainData = data[5].rain;
-                const pm25Data = data[6].pm2dot5;
-                const pm10Data = data[7].pm10;
+                const xData =  Object.keys(data[0]);
+                const temperatureData = Object.values(data[0]);
+                const humidityData = Object.values(data[1]);
+                const pressureData = Object.values(data[2]);
+                const windSpeedData = Object.values(data[3]);
+                const noiseData = Object.values(data[4]);
+                const rainData = Object.values(data[5]);
+                const pm25Data = Object.values(data[6]);
+                const pm10Data = Object.values(data[7]);
 
                 // 生成表格
                 createOverviewChart(chartDom, xData, temperatureData, humidityData, pressureData, windSpeedData, noiseData, rainData, pm25Data, pm10Data);
@@ -543,8 +543,9 @@
                     body:type,
                 });
                 const data = await response.json();
-                const xData = data.time.map(t => new Date(t).toLocaleString());
-                const yData = data[type];
+
+                const xData = Object.keys(data);;
+                const yData = Object.values(data);;
                 const yRange = getYRange(yData);
                 createChart(chartDom, xData, yData, type, yRange[0], yRange[1]);
             } catch (error) {

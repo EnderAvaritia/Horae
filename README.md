@@ -14,6 +14,7 @@
 - server中的程序用于接收接收器收集的数据
   - simple_http_server.py是服务器的后端
   - index.html作为前端用于向用户展示
+    - 在script里面有个常量，叫server_URL，请改成自己的服务端地址,原文长这样`const server_URL="http://192.168.10.11:8080"`
 
 ---
 
