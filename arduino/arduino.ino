@@ -1,30 +1,41 @@
-#include <WiFi.h>
-#include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <HTTPClient.h>
 #include <DS18B20.h>
 #include <DHT11.h>
+#include <WiFi.h>
+#include <time.h>
 
 // 板子上的灯，显示信息用的
 #define LED_Board 2
 // 定义DS18B20和DHT11的引脚
 #define DHT11_pin 17
 #define DS18B20_pin 16
+// 定义时区（东）
+#define timeZone 8
 // 设置NTP服务器
 #define NTP "ntp.aliyun.com"
+
 // 初始化引脚
 DHT11 dht11(DHT11_pin);
 DS18B20 ds18b20(DS18B20_pin);
 
-const char *position = "1";
 // 定义 WiFi 名与密码
 const char *ssid = "Tenda_9C8F60";
 const char *password = "password";
 
 // 请求的URL
-String url = "http://192.168.10.104:8080";
+const String URL = "http://192.168.10.11:8080";
+
+const char *position = "1";
 
 // 写点常量
 struct tm timeinfo;
+time_t myTime;
+
+// 整点json用的
+String defaultRecord = "{\"time\":0,\"pisition\":0,\"temperature\":0,\"humidity\":0,\"pressure\":0,\"wind_speed\":0,\"noise\":0,\"rain\":0,\"pm2dot5\":0,\"pm10\":0}";
+DynamicJsonDocument doc(1024);
+String lastData;
 
 void wifi_init()
 {
@@ -38,16 +49,12 @@ void wifi_init()
 	{
 		delay(500);
 		Serial.print(".");
-		digitalWrite(LED_Board, HIGH);
-		delay(100);
-		digitalWrite(LED_Board, LOW);
-		delay(100);
 	}
 
 	Serial.println("连接成功");
 	Serial.print("IP 地址：");
 	Serial.println(WiFi.localIP());
-	digitalWrite(LED_Board, LOW);
+	// digitalWrite(LED_Board, LOW);
 }
 
 void time_init()
@@ -59,7 +66,7 @@ void time_init()
 		// 连接 WiFi
 		wifi_init();
 		// 从 NTP 服务器获取时间并设置
-		configTime(8 * 3600, 0, NTP);
+		configTime(timeZone * 3600, 0, NTP);
 		return;
 	}
 
@@ -81,9 +88,39 @@ void setup()
 
 void loop()
 {
+	// 初始化http
+	HTTPClient http;
+	http.begin(URL);
+	http.addHeader("Content-Type", "application/json");
+
+	// 还是json
+	deserializeJson(doc, defaultRecord);
+	JsonObject obj = doc.as<JsonObject>();
+
+	obj["pisition"] = "1";
+	// 以上这俩不能在函数外声明
 
 	time_init();
 	float TempC = ds18b20.getTempC();
-	Serial.println(TempC);
+	int Humidity = dht11.readHumidity();
+
+	myTime = time(NULL);
+
+	obj["time"] = myTime;
+	obj["temperature"] = TempC;
+	obj["humidity"] = Humidity;
+
+	serializeJson(doc, lastData);
+	Serial.println(lastData);
+
+	if (myTime > 100000)
+	{
+		int httpResponseCode = http.POST(lastData);
+		Serial.println(httpResponseCode);
+	}
+  else{
+    Serial.println("NO Send");
+  }
+
 	delay(10000);
 }
